@@ -1,203 +1,109 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>IPTV Player</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BD BOX TV - Live Player</title>
+    
+    <link href="https://vjs.zencdn.net/8.10.0/video-js.css" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@1,700&display=swap" rel="stylesheet">
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background-color: #f0f0f0; font-family: 'Segoe UI', Arial, sans-serif; text-align: center; padding-bottom: 50px; }
+        
+        .header {
+            background: linear-gradient(90deg, #FF0000 0%, #FF8C00 100%);
+            color: #fff; padding: 15px; margin-bottom: 20px; text-transform: uppercase;
+            letter-spacing: 2px; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
 
-<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+        .main-wrapper { max-width: 650px; margin: 0 auto; background: #fff; padding: 15px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        
+        .player-container { position: relative; width: 100%; border-radius: 8px; overflow: hidden; background: #000; }
+        .video-js { width: 100% !important; height: auto; aspect-ratio: 16/9; }
 
-<style>
-body{
-  margin:0;
-  background:#0f0f0f;
-  color:white;
-  font-family:Arial;
-}
+        /* --- আগের ফন্ট দিয়ে তৈরি ছোট ওয়াটারমার্ক --- */
+        .watermark { 
+            position: absolute; 
+            top: 10px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            color: rgba(255, 255, 255, 0.65); 
+            font-family: 'Playfair Display', serif; /* আপনার পছন্দের আগের ফন্ট */
+            font-size: 13px; /* সাইজ ছোট রাখা হয়েছে */
+            font-style: italic;
+            font-weight: bold;
+            z-index: 10; 
+            pointer-events: none; 
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
+            letter-spacing: 0.5px;
+        }
 
-/* Layout */
-.container{
-  display:flex;
-  height:100vh;
-}
+        .btn-player { background: #ff8c00; color: white; border: none; padding: 12px; font-size: 16px; border-radius: 5px; cursor: pointer; margin: 15px 0; width: 100%; font-weight: bold; text-transform: uppercase; transition: 0.3s; }
+        .btn-player:hover { background: #e67e00; }
 
-/* Sidebar (Channels) */
-.sidebar{
-  width:260px;
-  background:#1c1c1c;
-  overflow-y:auto;
-  padding:10px;
-}
+        /* অ্যাড বক্স */
+        .my-own-ad { 
+            display: block; margin: 20px 0; border: 1px solid #eee; padding: 10px; 
+            border-radius: 10px; background: #fafafa; text-decoration: none; 
+        }
+        .my-own-ad img { width: 100%; height: auto; border-radius: 6px; margin-bottom: 10px; display: block; }
+        
+        .whatsapp-btn {
+            background-color: #25D366; color: #fff; font-size: 16px; font-weight: bold;
+            padding: 12px; border-radius: 5px; display: flex; align-items: center;
+            justify-content: center; gap: 10px; animation: pulse 2s infinite;
+        }
 
-.channel{
-  padding:10px;
-  margin:5px 0;
-  background:#2a2a2a;
-  cursor:pointer;
-  border-radius:5px;
-}
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+            100% { transform: scale(1); }
+        }
 
-.channel:hover{
-  background:#444;
-}
-
-/* Player area */
-.player-area{
-  flex:1;
-  display:flex;
-  flex-direction:column;
-}
-
-/* Video */
-video{
-  width:100%;
-  height:70vh;
-  background:black;
-}
-
-/* Controls */
-.controls{
-  display:flex;
-  gap:10px;
-  padding:10px;
-  background:#181818;
-  align-items:center;
-}
-
-button, select{
-  padding:8px;
-  background:#333;
-  color:white;
-  border:none;
-  border-radius:5px;
-  cursor:pointer;
-}
-
-/* EPG */
-.epg{
-  padding:10px;
-  background:#111;
-  height:30vh;
-  overflow-y:auto;
-  font-size:14px;
-}
-</style>
+        .counter-box { border: 1px solid #ddd; padding: 10px; width: 220px; margin: 20px auto; font-size: 13px; border-radius: 8px; }
+        .counter-num { font-weight: bold; color: #ff0000; font-size: 16px; }
+    </style>
 </head>
-
 <body>
 
-<div class="container">
+    <div class="header">
+        <h2>BD BOX TV - Live</h2>
+    </div>
 
-<!-- CHANNEL LIST -->
-<div class="sidebar" id="channelList">
-<h3>📺 Channels</h3>
-</div>
+    <div class="main-wrapper">
+        
+        <div class="player-container">
+            <div class="watermark">BD BOX TV</div>
+            <video id="live-player" class="video-js vjs-default-skin vjs-big-play-centered" controls preload="auto" poster="https://res.cloudinary.com/dlklqihg6/image/upload/v1758819334/tglzsdq34uitwxd8xlg6.png">
+                <source src="https://river-1.rutube.ru/stream/genetta-420.ntv.rutube.ru/BhPqexlMaKoT1bhTgRUKtA/1780499015/7c13a51576b9ff2601f08f5d57dd5169/1080p_stream.m3u8" type="application/x-mpegURL">
+            </video>
+        </div>
 
-<!-- PLAYER -->
-<div class="player-area">
+        <button class="btn-player" id="switch-link">Player 2 / Telegram Support</button>
 
-<video id="video" controls></video>
+        <a href="https://wa.me/+8801531151169" class="my-own-ad" target="_blank">
+            <img src="https://res.cloudinary.com/dlklqihg6/image/upload/v1779876392/uctp205duwn37jjuvfuy.jpg" alt="Order Now">
+            <div class="whatsapp-btn">
+                <span>💬 Order on WhatsApp</span>
+            </div>
+        </a>
 
-<div class="controls">
-<button onclick="toggleFullscreen()">⛶ Fullscreen</button>
+        <div class="counter-box">
+            <div>Online: <span class="counter-num">58</span></div>
+            <div style="margin-top:5px">Total Visitors: <span class="counter-num">1,035</span></div>
+        </div>
+    </div>
 
-<select id="quality" onchange="changeQuality()">
-<option value="auto">Auto Quality</option>
-</select>
+    <script src="https://vjs.zencdn.net/8.10.0/video.min.js"></script>
 
-<button onclick="loadEPG()">📡 EPG</button>
-</div>
-
-<div class="epg" id="epgBox">
-📡 EPG will show here...
-</div>
-
-</div>
-</div>
-
-<script>
-
-// ===== SAMPLE IPTV PLAYLIST =====
-const playlist = [
-{
-name:"📺 Channel 1 (News)",
-url:"https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8"
-},
-{
-name:"🎬 Channel 2 (Sports)",
-url:"https://river-1.rutube.ru/stream/genetta-301.m9.rutube.ru/5_GzmCR6Q3_Lao9SQPe7DA/1780246595/7c13a51576b9ff2601f08f5d57dd5169/360p_stream.m3u8"
-},
-{
-name:"🎥 Channel 3 (Movies)",
-url:"https://test-streams.mux.dev/bbb_30s/bbb_30s.m3u8"
-}
-];
-
-const video = document.getElementById("video");
-let hls;
-
-// ===== LOAD CHANNEL LIST =====
-const list = document.getElementById("channelList");
-
-playlist.forEach((ch, index)=>{
-  let div = document.createElement("div");
-  div.className="channel";
-  div.innerHTML=ch.name;
-
-  div.onclick=()=>playChannel(ch.url);
-
-  list.appendChild(div);
-});
-
-// ===== PLAY CHANNEL =====
-function playChannel(url){
-
-  if(hls){
-    hls.destroy();
-  }
-
-  if(Hls.isSupported()){
-    hls = new Hls();
-    hls.loadSource(url);
-    hls.attachMedia(video);
-  }
-  else{
-    video.src=url;
-  }
-
-  video.play();
-}
-
-// default play
-playChannel(playlist[0].url);
-
-// ===== FULLSCREEN =====
-function toggleFullscreen(){
-  if(!document.fullscreenElement){
-    document.documentElement.requestFullscreen();
-  }else{
-    document.exitFullscreen();
-  }
-}
-
-// ===== QUALITY (demo) =====
-function changeQuality(){
-  alert("Quality change depends on multi-stream HLS (master.m3u8)");
-}
-
-// ===== EPG (demo) =====
-function loadEPG(){
-  document.getElementById("epgBox").innerHTML=`
-  <b>📡 Now Playing:</b><br>
-  10:00 - Live News<br>
-  11:00 - Sports Update<br>
-  12:00 - Movie Block<br><br>
-
-  <b>Next:</b><br>
-  13:00 - Documentary
-  `;
-}
-
-</script>
-
+    <script>
+        var player = videojs('live-player');
+        const otherWebsiteLink = "https://t.me/+JSvX2Vz-ACA1ZTdl"; 
+        document.getElementById('switch-link').addEventListener('click', function() {
+            window.location.href = otherWebsiteLink;
+        });
+    </script>
 </body>
 </html>
